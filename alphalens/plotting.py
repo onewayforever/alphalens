@@ -30,6 +30,10 @@ from . import performance as perf
 
 DECIMAL_TO_BPS = 10000
 
+TMP_PATH="./alphalens_tmp"
+import os
+os.makedirs(TMP_PATH, exist_ok=True)
+
 
 def customize(func):
     """
@@ -145,6 +149,7 @@ def plot_returns_table(alpha_beta,
 
     print("Returns Analysis")
     utils.print_table(returns_table.apply(lambda x: x.round(3)))
+    returns_table.apply(lambda x: x.round(3)).to_csv("{}/returns_table.csv".format(TMP_PATH))
 
 
 def plot_turnover_table(autocorrelation_data, quantile_turnover):
@@ -161,6 +166,8 @@ def plot_turnover_table(autocorrelation_data, quantile_turnover):
     print("Turnover Analysis")
     utils.print_table(turnover_table.apply(lambda x: x.round(3)))
     utils.print_table(auto_corr.apply(lambda x: x.round(3)))
+    turnover_table.apply(lambda x: x.round(3)).to_csv("{}/turnover_table.csv".format(TMP_PATH))
+    auto_corr.apply(lambda x: x.round(3)).to_csv("{}/auto_corr.csv".format(TMP_PATH))
 
 
 def plot_information_table(ic_data):
@@ -177,6 +184,7 @@ def plot_information_table(ic_data):
 
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
+    ic_summary_table.apply(lambda x: x.round(3)).to_csv("{}/ic_summary_table.csv".format(TMP_PATH))
 
 
 def plot_quantile_statistics_table(factor_data):
@@ -187,6 +195,7 @@ def plot_quantile_statistics_table(factor_data):
 
     print("Quantiles Statistics")
     utils.print_table(quantile_stats)
+    quantile_stats.to_csv("{}/quantile_stats.csv".format(TMP_PATH))
 
 
 def plot_ic_ts(ic, ax=None):

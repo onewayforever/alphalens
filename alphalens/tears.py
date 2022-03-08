@@ -22,6 +22,9 @@ from . import plotting
 from . import performance as perf
 from . import utils
 
+TMP_PATH="./alphalens_tmp"
+import os
+os.makedirs(TMP_PATH, exist_ok=True)
 
 class GridFigure(object):
     """
@@ -303,6 +306,7 @@ def create_returns_tear_sheet(
         ax=ax_mean_quantile_returns_spread_ts,
     )
 
+    gf.fig.savefig('{}/returns_tear.png'.format(TMP_PATH),bbox_inches='tight')
     plt.show()
     gf.close()
 
@@ -340,6 +344,7 @@ def create_returns_tear_sheet(
             ylim_percentiles=(5, 95),
             ax=ax_quantile_returns_bar_by_group,
         )
+        gf.fig.savefig('{}/returns_group_tear.png'.format(TMP_PATH),bbox_inches='tight')
         plt.show()
         gf.close()
 
@@ -402,6 +407,7 @@ def create_information_tear_sheet(
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
+    gf.fig.savefig('{}/information_tear.png'.format(TMP_PATH),bbox_inches='tight')
     plt.show()
     gf.close()
 
@@ -431,7 +437,7 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
     if turnover_periods is None:
         input_periods = utils.get_forward_returns_columns(
             factor_data.columns, require_exact_day_multiple=True,
-        ).get_values()
+        ).to_numpy()
         turnover_periods = utils.timedelta_strings_to_integers(input_periods)
     else:
         turnover_periods = utils.timedelta_strings_to_integers(
@@ -481,6 +487,7 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
             autocorrelation[period], period=period, ax=gf.next_row()
         )
 
+    gf.fig.savefig('{}/turnover_tear.png'.format(TMP_PATH),bbox_inches='tight')
     plt.show()
     gf.close()
 
@@ -599,6 +606,7 @@ def create_event_returns_tear_sheet(factor_data,
             ax=ax_avg_cumulative_returns_by_q,
         )
 
+    gf.fig.savefig('{}/event_returns_tear.png'.format(TMP_PATH),bbox_inches='tight')
     plt.show()
     gf.close()
 
@@ -628,6 +636,7 @@ def create_event_returns_tear_sheet(factor_data,
                 ax=gf.next_cell(),
             )
 
+        gf.fig.savefig('{}/event_returns_group_tear.png'.format(TMP_PATH),bbox_inches='tight')
         plt.show()
         gf.close()
 
@@ -728,5 +737,6 @@ def create_event_study_tear_sheet(factor_data,
             UserWarning,
         )
 
+    gf.fig.savefig('{}/event_study_tear.png'.format(TMP_PATH),bbox_inches='tight')
     plt.show()
     gf.close()
