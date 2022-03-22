@@ -17,10 +17,23 @@ import pandas as pd
 import numpy as np
 import re
 import warnings
+import os
 
 from IPython.display import display
 from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
 from scipy.stats import mode
+
+result_path=None
+
+def save_to_path(path):
+    global result_path
+    try:
+        os.makedirs(path, exist_ok=True)
+    except:
+        print("Make result path failed")
+        return False
+    result_path = path
+    return True
 
 
 class NonMatchingTimezoneError(Exception):
