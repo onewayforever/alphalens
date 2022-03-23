@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 import pandas as pd
 import numpy as np
 import re
 import warnings
 import os
+import json
 
 from IPython.display import display
 from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
@@ -25,16 +27,56 @@ from scipy.stats import mode
 
 result_path=None
 
-def save_to_path(path):
+def to_save_experiment(factors,name,path):
     global result_path
-    try:
-        os.makedirs(path, exist_ok=True)
-    except:
-        print("Make result path failed")
-        return False
+    if os.path.exists(path) and os.path.isdir(path):
+        print("Experiemnt folder already exist, Exiting...")
+        exit(0)
+    os.makedirs(path)
     result_path = path
+    start_date=factors.index.min()
+    end_date=factors.index.max()
+    print(start_date,end_date)
+    period = (end_date[0]-start_date[0]).days
+    start_run = datetime.now()
+    meta = {
+        "factor":name,
+        "start_date":start_date[0].strftime("%Y%m%d"),
+        "end_date":end_date[0].strftime("%Y%m%d"),
+        "period":period,
+        "start_run":start_run.strftime("%Y%m%d%h%M")
+    }
+    json.dump(meta,open(os.path.join(path,'meta.json'),'w'))
     return True
 
+def log_experiment_to_neptune(path,project_name,token):
+    import neptune.new as neptune
+    run = neptune.init(project=project_name, api_token=token)
+    try:
+        meta = json.load(open(os.path.join(path,'meta.json')))
+        factor = meta['factor']
+    except:
+        print("Load experiment data from {} failed!".format(path))
+        return
+    print('Start logging result of factor:{} ... '.format(factor))
+    for k in meta.keys():
+        run[k] = meta[k]
+
+    files=["auto_corr","ic_summary_table","quantile_stats","returns_table","turnover_table"]
+    for csv in files:
+        df =  pd.read_csv("{}/{}.csv".format(path,csv))
+        for idx,row in df.iterrows():
+            for i in range(1,len(row.index)):
+                key = '_'.join([str(row[0]).strip(),str(row.index[i]).strip()])
+                value = row[i]
+                print(key,value)
+                run[key] = value
+        run['tables/{}'.format(csv)].upload(neptune.types.File.as_html(df))
+    images=["information_tear","returns_tear","turnover_tear"]
+    for f in images:
+        run['pictures/{}'.format(f)].upload("{}/{}.png".format(path,f))
+    run.stop()
+    print('End of logging result of factor:{} ... '.format(factor))
 
 class NonMatchingTimezoneError(Exception):
     pass
