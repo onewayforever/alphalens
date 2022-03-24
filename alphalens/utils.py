@@ -50,6 +50,13 @@ def to_save_experiment(factors,name,path):
     return True
 
 def log_experiment_to_neptune(path,project_name,token):
+    sync = {'target':[]}
+    if os.path.exists(path,'sync.json'):
+        sync = json.load(open(os.path.join(path,'sync.json')))
+        targets = sync.get("target")
+        if targets is not None and 'neptune' in targets:
+            print("Already sync-ed to neptune, passing")
+            return
     import neptune.new as neptune
     run = neptune.init(project=project_name, api_token=token)
     try:
@@ -76,6 +83,8 @@ def log_experiment_to_neptune(path,project_name,token):
     for f in images:
         run['pictures/{}'.format(f)].upload("{}/{}.png".format(path,f))
     run.stop()
+    sync['target'].append('neptune')
+    json.dump(sync,open(os.path.join(path,'sync.json'),'w'))
     print('End of logging result of factor:{} ... '.format(factor))
 
 class NonMatchingTimezoneError(Exception):
