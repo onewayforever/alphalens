@@ -51,7 +51,7 @@ def to_save_experiment(factors,name,path):
 
 def log_experiment_to_neptune(path,project_name,token):
     sync = {'target':[]}
-    if os.path.exists(path,'sync.json'):
+    if os.path.exists(os.path.join(path,'sync.json')):
         sync = json.load(open(os.path.join(path,'sync.json')))
         targets = sync.get("target")
         if targets is not None and 'neptune' in targets:
