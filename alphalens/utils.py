@@ -57,14 +57,14 @@ def log_experiment_to_neptune(path,project_name,token):
         if targets is not None and 'neptune' in targets:
             print("Already sync-ed to neptune, passing")
             return
-    import neptune.new as neptune
-    run = neptune.init(project=project_name, api_token=token)
     try:
         meta = json.load(open(os.path.join(path,'meta.json')))
         factor = meta['factor']
     except:
         print("Load experiment data from {} failed!".format(path))
         return
+    import neptune.new as neptune
+    run = neptune.init(project=project_name, api_token=token)
     print('Start logging result of factor:{} ... '.format(factor))
     for k in meta.keys():
         run[k] = meta[k]
