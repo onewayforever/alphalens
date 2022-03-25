@@ -76,7 +76,9 @@ def log_experiment_to_neptune(path,project_name,token):
             for i in range(1,len(row.index)):
                 key = '_'.join([str(row[0]).strip(),str(row.index[i]).strip()])
                 value = row[i]
-                print(key,value)
+                #print(key,value)
+                if isinstance(value,float):
+                    value = format(value,'.3f')
                 run[key] = value
         run['tables/{}'.format(csv)].upload(neptune.types.File.as_html(df))
     images=["information_tear","returns_tear","turnover_tear"]
